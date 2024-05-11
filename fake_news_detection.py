@@ -1,152 +1,25 @@
-"""Fake News Detection.ipynb
-
-Test file located at
-    https://colab.research.google.com/drive/182Un3Jf-aeuAjs007qD9oZTsYGydPPs0
-"""
-
-# Fake news detection using ML
-
-# SECTION 1: Making necessary imports ================================================
+import itertools
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn import feature_extraction, linear_model, model_selection, preprocessing
-from sklearn.metrics import accuracy_score
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
-
-
-# SECTION 2: Reading Data set ================================================
-fake = pd.read_csv("data/Fake.csv")
-true = pd.read_csv("data/True.csv")
-
-fake.shape
-true.shape
-
-# print("Shape of 'fake' DataFrame:", fake.shape)
-# print("Shape of 'true' DataFrame:", true.shape)
-
-# Data cleaning and preparation ================================================
-
-#  Add flag to track fake and real
-fake['target'] = 'fake'
-true['target'] = 'true'
-
-# Concatenate dataframes
-data = pd.concat([fake, true]).reset_index(drop = True)
-data.shape
-
-# Shuffle the data
-from sklearn.utils import shuffle
-data = shuffle(data)
-data = data.reset_index(drop=True)
-
-# Check the data
-data.head()
-
-# Removing the date (we won't use it for the analysis)
-data.drop(["date"],axis=1,inplace=True)
-data.head()
-
-# Removing the title (we will only use the text)
-data.drop(["title"],axis=1,inplace=True)
-data.head()
-
-# Convert to lowercase
-
-data['text'] = data['text'].apply(lambda x: x.lower())
-data.head()
-
-# Remove punctuation
-
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, confusion_matrix
 import string
-
-def punctuation_removal(text):
-    all_list = [char for char in text if char not in string.punctuation]
-    clean_str = ''.join(all_list)
-    return clean_str
-
-data['text'] = data['text'].apply(punctuation_removal)
-
-# Removing stopwords
-import nltk
-nltk.download('stopwords')
 from nltk.corpus import stopwords
-stop = stopwords.words('english')
+from nltk import tokenize
+from wordcloud import WordCloud
+import seaborn as sns
+import nltk
+import pickle
 
-data['text'] = data['text'].apply(lambda x: ' '.join([word for word in x.split() if word not in (stop)]))
-
-# SECTION 3: Basic data exploration ================================================ 
-
-# #1. How many articles per subject?
-# print(data.groupby(['subject'])['text'].count())
-# data.groupby(['subject'])['text'].count().plot(kind="bar")
-# plt.show()
-
-# #2. How many fake and real articles?
-# print(data.groupby(['target'])['text'].count())
-# data.groupby(['target'])['text'].count().plot(kind="bar")
-# plt.show()
-
-# #3. Word cloud for fake news
-# from wordcloud import WordCloud
-
-# fake_data = data[data["target"] == "fake"]
-# all_words = ' '.join([text for text in fake_data.text])
-
-# wordcloud = WordCloud(width= 800, height= 500,
-#                           max_font_size = 110,
-#                           collocations = False).generate(all_words)
-
-# plt.figure(figsize=(10,7))
-# plt.imshow(wordcloud, interpolation='bilinear')
-# plt.axis("off")
-# plt.show()
-
-# #4. Word cloud for real news
-# from wordcloud import WordCloud
-
-# real_data = data[data["target"] == "true"]
-# all_words = ' '.join([text for text in fake_data.text])
-
-# wordcloud = WordCloud(width= 800, height= 500,
-#                           max_font_size = 110,
-#                           collocations = False).generate(all_words)
-
-# plt.figure(figsize=(10,7))
-# plt.imshow(wordcloud, interpolation='bilinear')
-# plt.axis("off")
-# plt.show()
-
-# #5. Most frequent words counter 
-# from nltk import tokenize
-# token_space = tokenize.WhitespaceTokenizer()
-
-# def counter(text, column_text, quantity):
-#     all_words = ' '.join([text for text in text[column_text]])
-#     token_phrase = token_space.tokenize(all_words)
-#     frequency = nltk.FreqDist(token_phrase)
-#     df_frequency = pd.DataFrame({"Word": list(frequency.keys()),
-#                                    "Frequency": list(frequency.values())})
-#     df_frequency = df_frequency.nlargest(columns = "Frequency", n = quantity)
-#     plt.figure(figsize=(12,8))
-#     ax = sns.barplot(data = df_frequency, x = "Word", y = "Frequency", color = 'blue')
-#     ax.set(ylabel = "Count")
-#     plt.xticks(rotation='vertical')
-#     plt.show()
-
-# #6. Most frequent words in fake news
-# counter(data[data["target"] == "fake"], "text", 20)
-
-# #7. Most frequent words in real news
-# counter(data[data["target"] == "true"], "text", 20)
-
-# SECTION 4: Modeling ================================================ 
-from sklearn import metrics
-import itertools
+nltk.download('stopwords')
 
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
@@ -176,91 +49,126 @@ def plot_confusion_matrix(cm, classes,
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
 
-# Split the data
-X_train,X_test,y_train,y_test = train_test_split(data['text'], data.target, test_size=0.2, random_state=42)
 
-# Naive Bayes Algo Modeling
-dct = dict()
-from sklearn.naive_bayes import MultinomialNB
-NB_classifier = MultinomialNB()
-pipe = Pipeline([('vect', CountVectorizer()),
-                 ('tfidf', TfidfTransformer()),
-                 ('model', NB_classifier)])
-model = pipe.fit(X_train, y_train)
-prediction = model.predict(X_test)
-print("Naive Bayes Accuracy: {}%".format(round(accuracy_score(y_test, prediction)*100,2)))
-dct['Naive Bayes'] = round(accuracy_score(y_test, prediction)*100,2)
-cm = metrics.confusion_matrix(y_test, prediction)
-plot_confusion_matrix(cm, classes=['Fake', 'Real'])
-import pickle
-model_path = 'NaiveBayesModel.pkl'
-with open(model_path, 'wb') as file:
-    pickle.dump(NB_classifier, file)
+# Read data
+fake = pd.read_csv("data/Fake.csv")
+true = pd.read_csv("data/True.csv")
 
-# Logistic regression Algo Modelling
-from sklearn.linear_model import LogisticRegression
-LR_classifier = LogisticRegression()
-pipe = Pipeline([('vect', CountVectorizer()),
-                 ('tfidf', TfidfTransformer()),
-                 ('model', LR_classifier)])
-model = pipe.fit(X_train, y_train)
-prediction = model.predict(X_test)
-print("Logistic Regression Accuracy: {}%".format(round(accuracy_score(y_test, prediction)*100,2)))
-dct['Logistic Regression'] = round(accuracy_score(y_test, prediction)*100,2)
-cm = metrics.confusion_matrix(y_test, prediction)
-plot_confusion_matrix(cm, classes=['Fake', 'Real'])
-import pickle
-model_path = 'LogisticRegressionModel.pkl'
-with open(model_path, 'wb') as file:
-    pickle.dump(LR_classifier, file)
+# Add target labels
+fake['target'] = 'fake'
+true['target'] = 'true'
 
-# DecisionTree Algo Modelling
-from sklearn.tree import DecisionTreeClassifier
-DT_classifier = DecisionTreeClassifier(criterion= 'entropy',
-                                           max_depth = 20,
-                                           splitter='best',
-                                           random_state=42)
-pipe = Pipeline([('vect', CountVectorizer()),
-                 ('tfidf', TfidfTransformer()),
-                 ('model', DT_classifier)])
-model = pipe.fit(X_train, y_train)
-prediction = model.predict(X_test)
-print("Decision Tree Accuracy: {}%".format(round(accuracy_score(y_test, prediction)*100,2)))
-dct['Decision Tree'] = round(accuracy_score(y_test, prediction)*100,2)
-cm = metrics.confusion_matrix(y_test, prediction)
-plot_confusion_matrix(cm, classes=['Fake', 'Real'])
-import pickle
-model_path = 'DecisionTreeModel.pkl'
-with open(model_path, 'wb') as file:
-    pickle.dump(DT_classifier, file)
+# Concatenate dataframes
+data = pd.concat([fake, true]).reset_index(drop=True)
 
+# Shuffle the data
+data = data.sample(frac=1, random_state=42).reset_index(drop=True)
 
-# Random Forest Algo Modelling
-from sklearn.ensemble import RandomForestClassifier
-RF_classifier = RandomForestClassifier(n_estimators=50, criterion="entropy")
-pipe = Pipeline([('vect', CountVectorizer()),
-                 ('tfidf', TfidfTransformer()),
-                 ('model', RF_classifier)])
-model = pipe.fit(X_train, y_train)
-prediction = model.predict(X_test)
-print("Random Forest Accuracy: {}%".format(round(accuracy_score(y_test, prediction)*100,2)))
-dct['Random Forest'] = round(accuracy_score(y_test, prediction)*100,2)
-from sklearn import svm
-clf = svm.SVC(kernel='linear')
-pipe = Pipeline([('vect', CountVectorizer()),
-                 ('tfidf', TfidfTransformer()),
-                 ('model', clf)])
-model = pipe.fit(X_train, y_train)
-prediction = model.predict(X_test)
-print("Random Forest Accuracy: {}%".format(round(accuracy_score(y_test, prediction)*100,2)))
-dct['SVM'] = round(accuracy_score(y_test, prediction)*100,2)
-import pickle
-model_path = 'RandomForestModel.pkl'
-with open(model_path, 'wb') as file:
-    pickle.dump(RF_classifier, file)
+# Remove unnecessary columns
+data.drop(["date", "title"], axis=1, inplace=True)
 
-# import matplotlib.pyplot as plt
-# plt.figure(figsize=(8,7))
-# plt.bar(list(dct.keys()),list(dct.values()))
-# plt.ylim(90,100)
-# plt.yticks((91, 92, 93, 94, 95, 96, 97, 98, 99, 100))
+# Text preprocessing
+stop = stopwords.words('english')
+def preprocess_text(text):
+    text = text.lower()
+    text = ''.join([char for char in text if char not in string.punctuation])
+    text = ' '.join([word for word in text.split() if word not in stop])
+    return text
+
+data['text'] = data['text'].apply(preprocess_text)
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(data['text'], data['target'], test_size=0.2, random_state=42)
+
+# Data exploration
+# 1. How many articles per subject?
+print(data.groupby(['subject'])['text'].count())
+data.groupby(['subject'])['text'].count().plot(kind="bar")
+plt.title("Number of Articles per Subject")
+plt.xlabel("Subject")
+plt.ylabel("Number of Articles")
+plt.show()
+
+# 2. How many fake and real articles?
+print(data.groupby(['target'])['text'].count())
+data.groupby(['target'])['text'].count().plot(kind="bar")
+plt.title("Number of Fake and Real Articles")
+plt.xlabel("Target")
+plt.ylabel("Number of Articles")
+plt.show()
+
+# 3. Word cloud for fake news
+fake_data = data[data["target"] == "fake"]
+all_words_fake = ' '.join([text for text in fake_data.text])
+wordcloud_fake = WordCloud(width=800, height=500, max_font_size=110, collocations=False).generate(all_words_fake)
+plt.figure(figsize=(10, 7))
+plt.imshow(wordcloud_fake, interpolation='bilinear')
+plt.title("Word Cloud for Fake News")
+plt.axis("off")
+plt.show()
+
+# 4. Word cloud for real news
+real_data = data[data["target"] == "true"]
+all_words_real = ' '.join([text for text in real_data.text])
+wordcloud_real = WordCloud(width=800, height=500, max_font_size=110, collocations=False).generate(all_words_real)
+plt.figure(figsize=(10, 7))
+plt.imshow(wordcloud_real, interpolation='bilinear')
+plt.title("Word Cloud for Real News")
+plt.axis("off")
+plt.show()
+
+# 5. Most frequent words counter
+token_space = tokenize.WhitespaceTokenizer()
+
+def counter(text, column_text, quantity):
+    all_words = ' '.join([text for text in text[column_text]])
+    token_phrase = token_space.tokenize(all_words)
+    frequency = nltk.FreqDist(token_phrase)
+    df_frequency = pd.DataFrame({"Word": list(frequency.keys()), "Frequency": list(frequency.values())})
+    df_frequency = df_frequency.nlargest(columns="Frequency", n=quantity)
+    plt.figure(figsize=(12, 8))
+    ax = sns.barplot(data=df_frequency, x="Word", y="Frequency", color='blue')
+    ax.set(ylabel="Count")
+    plt.xticks(rotation='vertical')
+    plt.title("Most Frequent Words")
+    plt.show()
+
+# 6. Most frequent words in fake news
+counter(data[data["target"] == "fake"], "text", 20)
+
+# 7. Most frequent words in real news
+counter(data[data["target"] == "true"], "text", 20)
+
+# Models to train
+models = {
+    'Naive Bayes': MultinomialNB(),
+    'Logistic Regression': LogisticRegression(),
+    'Decision Tree': DecisionTreeClassifier(criterion='entropy', max_depth=20, splitter='best', random_state=42),
+    'Random Forest': RandomForestClassifier(n_estimators=50, criterion="entropy"),
+    'SVM': SVC(kernel='linear')
+}
+
+# Train and save models
+for model_name, model_obj in models.items():
+    print(f"Training {model_name}...")
+    model = Pipeline([
+        ('vect', CountVectorizer()),
+        ('tfidf', TfidfTransformer()),
+        ('clf', model_obj)
+    ])
+    model.fit(X_train, y_train)
+    
+    # Save the trained model
+    with open(f'{model_name.replace(" ", "")}Model.pkl', 'wb') as f:
+        pickle.dump(model, f)
+
+    # Test the model with test data
+    prediction = model.predict(X_test)
+    accuracy = accuracy_score(y_test, prediction)
+    print(f"{model_name} Accuracy: {accuracy * 100:.2f}%")
+
+    # Confusion matrix
+    cm = confusion_matrix(y_test, prediction)
+    plt.figure()
+    plot_confusion_matrix(cm, classes=['Fake', 'Real'], title=f'Confusion matrix for {model_name}')
+    plt.show()
