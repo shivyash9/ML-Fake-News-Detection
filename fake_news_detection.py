@@ -18,6 +18,7 @@ from wordcloud import WordCloud
 import seaborn as sns
 import nltk
 import pickle
+import os
 
 nltk.download('stopwords')
 
@@ -149,6 +150,9 @@ models = {
 }
 
 # Train and save models
+MODELS_DIR = 'models'
+os.makedirs(MODELS_DIR, exist_ok=True)
+
 for model_name, model_obj in models.items():
     print(f"Training {model_name}...")
     model = Pipeline([
@@ -159,7 +163,7 @@ for model_name, model_obj in models.items():
     model.fit(X_train, y_train)
     
     # Save the trained model
-    with open(f'{model_name.replace(" ", "")}Model.pkl', 'wb') as f:
+    with open(os.path.join(MODELS_DIR, f'{model_name.replace(" ", "")}Model.pkl'), 'wb') as f:
         pickle.dump(model, f)
 
     # Test the model with test data
