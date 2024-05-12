@@ -8,20 +8,93 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='styles.css') }}"
     />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f2f2f2;
+      }
+      .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .note {
+        font-size: 14px;
+        color: #888;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        font-size: 32px;
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+      }
+      p {
+        font-size: 16px;
+        margin-bottom: 20px;
+        color: #555;
+      }
+      form {
+        margin-bottom: 20px;
+      }
+      label {
+        font-weight: bold;
+      }
+      input[type="text"],
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        resize: none;
+      }
+      input[type="submit"] {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      input[type="submit"]:hover {
+        background-color: #0056b3;
+      }
+      footer {
+        text-align: center;
+        margin-top: 30px;
+        font-size: 14px;
+        color: #888;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
       <h1>Fake News Detection</h1>
+      <p>Please enter the news text or paste the news link to analyze:</p>
+      <p class="note">NOTE: Supported Language (English)</p>
       <form action="/analyze" method="post">
         <label for="news">Enter News:</label><br />
-        <textarea id="news" name="news" rows="4" cols="50"></textarea><br />
+        <textarea id="news" name="news" rows="6" cols="50"></textarea>
         <input type="submit" value="Analyze" />
       </form>
       <form action="/analyze_via_link" method="post">
-        <label for="news_link">Paste News Link:</label><br />
-        <input type="text" id="news_link" name="news_link" /><br /><br />
+        <label for="news_link">Paste News Link:</label>
+        <input type="text" id="news_link" name="news_link" />
         <input type="submit" value="Analyze" />
       </form>
+      <footer>&copy; Yash, Raghvendra, Prateek CSE 2024 MMMUT Gorakhpur</footer>
     </div>
   </body>
 </html>

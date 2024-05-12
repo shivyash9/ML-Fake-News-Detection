@@ -4,23 +4,95 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Analysis Result</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f2f2f2;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+      }
+      h2 {
+        font-size: 24px;
+        margin-bottom: 10px;
+        color: #333;
+      }
+      p {
+        font-size: 16px;
+        margin-bottom: 10px;
+        color: #555;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        cursor: pointer;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+      }
+      li {
+        margin-bottom: 5px;
+      }
+      strong {
+        font-weight: bold;
+      }
+      .prediction-fake {
+        color: #ff0000;
+      }
+      .prediction-not-fake {
+        color: #00cc00;
+      }
+      .highlight {
+        font-weight: bold;
+        color: #007bff;
+      }
+    </style>
   </head>
   <body>
-    <h2>News:</h2>
-    <p>{{ news }}</p>
-    <h2>Model Predictions:</h2>
-    <ul>
-      {% for model, prediction in predictions %}
-      <li>
-        <strong>{{ model }}:</strong> Prediction: {% if prediction == 'True'
-        %}Not Fake{% else %}{{ prediction }}{% endif %}
-      </li>
-      {% endfor %}
-    </ul>
-    <h2>Final Prediction:</h2>
-    <p>
-      The majority of models predict that the news is: {{ final_prediction }}
-    </p>
-    <p>Accuracy: {{ accuracy }}%</p>
+    <div class="container">
+      <h2>News:</h2>
+      <p id="news">{{ news }}</p>
+      <h2>Model Predictions:</h2>
+      <ul>
+        {% for model, prediction in predictions %}
+        <li>
+          <strong>{{ model }}:</strong> Prediction:
+          <span
+            class="{% if prediction == 'True' %}prediction-not-fake{% else %}prediction-fake{% endif %}"
+          >
+            {% if prediction == 'True' %} Not Fake {% else %} {{ prediction }}
+            {% endif %}
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+      <h2>Final Prediction:</h2>
+      <p>
+        The majority of models predict that the news is:
+        <span
+          class="{% if final_prediction == 'Not Fake' %}prediction-not-fake{% else %}prediction-fake{% endif %}"
+          >{{ final_prediction }}</span
+        >
+      </p>
+      <p>Accuracy: <span class="highlight">{{ accuracy }}%</span></p>
+    </div>
+
+    <script>
+      const news = document.getElementById("news");
+
+      news.addEventListener("click", function () {
+        news.style.whiteSpace = "normal";
+        news.style.overflow = "auto";
+        news.style.textOverflow = "unset";
+      });
+    </script>
   </body>
 </html>
