@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import numpy as np
 import pickle
+import os 
 
 app = Flask(__name__)
 
@@ -72,4 +73,4 @@ def analyze_via_link():
     return render_template('result.html', news=scrapped_content, predictions=predictions, final_prediction=final_prediction, accuracy=accuracy)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
