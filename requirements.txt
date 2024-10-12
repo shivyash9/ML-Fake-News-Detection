@@ -1,4 +1,3 @@
-altgraph @ file:///AppleInternal/Library/BuildRoots/860631e9-c1c5-11ee-98ee-b6ef2fd8d87b/Library/Caches/com.apple.xbs/Sources/python3/altgraph-0.17.2-py2.py3-none-any.whl
 appnope==0.1.4
 asttokens==2.4.1
 beautifulsoup4==4.12.3
@@ -15,7 +14,6 @@ exceptiongroup==1.2.1
 executing==2.0.1
 Flask==3.0.3
 fonttools==4.51.0
-future @ file:///AppleInternal/Library/BuildRoots/860631e9-c1c5-11ee-98ee-b6ef2fd8d87b/Library/Caches/com.apple.xbs/Sources/python3/future-0.18.2-py3-none-any.whl
 idna==3.7
 importlib_metadata==7.1.0
 importlib_resources==6.4.0
@@ -28,7 +26,6 @@ joblib==1.4.2
 jupyter_client==8.6.1
 jupyter_core==5.7.2
 kiwisolver==1.4.5
-macholib @ file:///AppleInternal/Library/BuildRoots/860631e9-c1c5-11ee-98ee-b6ef2fd8d87b/Library/Caches/com.apple.xbs/Sources/python3/macholib-1.15.2-py2.py3-none-any.whl
 MarkupSafe==2.1.5
 matplotlib==3.8.4
 matplotlib-inline==0.1.7
@@ -55,7 +52,6 @@ requests==2.31.0
 scikit-learn==1.4.2
 scipy==1.13.0
 seaborn==0.13.2
-six @ file:///AppleInternal/Library/BuildRoots/860631e9-c1c5-11ee-98ee-b6ef2fd8d87b/Library/Caches/com.apple.xbs/Sources/python3/six-1.15.0-py2.py3-none-any.whl
 soupsieve==2.5
 stack-data==0.6.3
 threadpoolctl==3.5.0
